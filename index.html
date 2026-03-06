@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bookr — Appointment Scheduling</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c;
+    --cream: #f5f0e8;
+    --warm: #e8dfc8;
+    --accent: #c9572a;
+    --accent2: #2a6b4a;
+    --gold: #c8a94a;
+    --light-ink: #4a4540;
+    --card-bg: #faf7f2;
+    --border: #d8cfc0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 3rem;
+    border-bottom: 1.5px solid var(--border);
+    background: var(--cream);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
+  .logo span { color: var(--accent); }
+
+  .header-nav {
+    display: flex;
+    gap: 2rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--light-ink);
+  }
+  .header-nav a {
+    cursor: pointer;
+    transition: color 0.2s;
+    text-decoration: none;
+    color: inherit;
+  }
+  .header-nav a:hover { color: var(--accent); }
+
+  /* LAYOUT */
+  .app {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    min-height: calc(100vh - 73px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    border-right: 1.5px solid var(--border);
+    padding: 2.5rem 2rem;
+    background: var(--card-bg);
+  }
+
+  .sidebar-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .sidebar-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--light-ink);
+    margin-bottom: 1rem;
+    opacity: 0.7;
+  }
+
+  /* SERVICE SELECT */
+  .service-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .service-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.2rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--cream);
+  }
+  .service-item:hover {
+    border-color: var(--accent);
+    background: #fff;
+  }
+  .service-item.active {
+    border-color: var(--accent);
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(201,87,42,0.1);
+  }
+  .service-item.active .service-dot {
+    background: var(--accent);
+  }
+
+  .service-info { flex: 1; }
+  .service-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.15rem;
+  }
+  .service-duration {
+    font-size: 0.75rem;
+    color: var(--light-ink);
+    opacity: 0.7;
+  }
+  .service-price {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--accent2);
+  }
+  .service-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    margin-right: 0.75rem;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  /* STAFF SELECT */
+  .staff-list {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .staff-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    padding: 0.75rem 0.6rem;
+    border-radius: 10px;
+    border: 1.5px solid transparent;
+    transition: all 0.2s;
+    min-width: 70px;
+  }
+  .staff-item:hover { background: var(--warm); }
+  .staff-item.active {
+    border-color: var(--accent2);
+    background: #e8f3ec;
+  }
+
+  .staff-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .staff-name {
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-align: center;
+    color: var(--ink);
+  }
+
+  /* MAIN CONTENT */
+  .main {
+    padding: 2.5rem 3rem;
+  }
+
+  .step-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .step-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .step-subtitle {
+    color: var(--light-ink);
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+
+  /* CALENDAR */
+  .calendar-wrapper {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    max-width: 520px;
+    margin-bottom: 2.5rem;
+  }
+
+  .calendar-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1.5px solid var(--border);
+    background: var(--card-bg);
+  }
+
+  .cal-month {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .cal-btn {
+    background: none;
+    border: 1.5px solid var(--border);
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--light-ink);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cal-btn:hover {
+    background: var(--cream);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .calendar-grid {
+    padding: 1.2rem 1.5rem;
+  }
+
+  .day-headers {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    margin-bottom: 0.75rem;
+  }
+  .day-header {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--light-ink);
+    opacity: 0.6;
+    padding: 0.4rem 0;
+  }
+
+  .days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .day-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.88rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 400;
+    position: relative;
+  }
+  .day-cell.empty { cursor: default; }
+  .day-cell.past {
+    color: var(--border);
+    cursor: not-allowed;
+  }
+  .day-cell.available:hover {
+    background: var(--warm);
+    font-weight: 500;
+  }
+  .day-cell.has-slots::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent2);
+  }
+  .day-cell.selected {
+    background: var(--accent);
+    color: white;
+    font-weight: 700;
+  }
+  .day-cell.today {
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .day-cell.today::before {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border: 1.5px solid var(--accent);
+    border-radius: 6px;
+    pointer-events: none;
+  }
+  .day-cell.selected.today::before { display: none; }
+
+  /* TIME SLOTS */
+  .slots-section {
+    max-width: 520px;
+  }
+
+  .slots-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .slots-title .date-badge {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: var(--warm);
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+    color: var(--light-ink);
+  }
+
+  .time-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.6rem;
+  }
+
+  .time-slot {
+    padding: 0.65rem 0.4rem;
+    text-align: center;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #fff;
+  }
+  .time-slot:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: #fff8f5;
+  }
+  .time-slot.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  .time-slot.booked {
+    background: var(--warm);
+    color: var(--border);
+    cursor: not-allowed;
+    border-color: var(--border);
+    text-decoration: line-through;
+  }
+
+  /* BOOKING CONFIRMATION PANEL */
+  .booking-panel {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 340px;
+    background: #fff;
+    border-top: 1.5px solid var(--border);
+    padding: 1.25rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 -8px 30px rgba(15,14,12,0.08);
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 50;
+  }
+  .booking-panel.visible {
+    transform: translateY(0);
+  }
+
+  .booking-summary {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .summary-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.5;
+    font-weight: 500;
+  }
+  .summary-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .divider-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  .book-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.85rem 2.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: all 0.2s;
+  }
+  .book-btn:hover {
+    background: #b34820;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(201,87,42,0.3);
+  }
+  .book-btn:active { transform: translateY(0); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,14,12,0.6);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: var(--cream);
+    border-radius: 16px;
+    width: 480px;
+    max-width: 95vw;
+    overflow: hidden;
+    transform: scale(0.95) translateY(10px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .modal-overlay.open .modal {
+    transform: scale(1) translateY(0);
+  }
+
+  .modal-header {
+    padding: 2rem 2rem 1.5rem;
+    border-bottom: 1.5px solid var(--border);
+  }
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+  }
+  .modal-sub {
+    font-size: 0.82rem;
+    color: var(--light-ink);
+    opacity: 0.75;
+  }
+
+  .modal-body {
+    padding: 1.5rem 2rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.2rem;
+  }
+  .form-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--light-ink);
+    opacity: 0.75;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    background: #fff;
+    color: var(--ink);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--accent); }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .booking-recap {
+    background: var(--warm);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .recap-item { }
+  .recap-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.5;
+    font-weight: 500;
+    margin-bottom: 0.15rem;
+  }
+  .recap-value {
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .modal-footer {
+    padding: 1rem 2rem 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+  }
+
+  .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    border: 1.5px solid var(--border);
+    background: none;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--light-ink);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--ink); color: var(--ink); }
+
+  .btn-primary {
+    padding: 0.75rem 1.8rem;
+    background: var(--accent2);
+    border: none;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-family: 'DM Sans', sans-serif;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary:hover {
+    background: #1e5438;
+    transform: translateY(-1px);
+  }
+
+  /* SUCCESS */
+  .success-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 340px;
+    text-align: center;
+    padding: 2rem;
+  }
+  .success-screen.show { display: flex; }
+  .success-icon {
+    width: 72px;
+    height: 72px;
+    background: #e8f3ec;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes pop {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .success-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .success-sub {
+    color: var(--light-ink);
+    font-size: 0.88rem;
+    opacity: 0.75;
+    max-width: 280px;
+    line-height: 1.6;
+  }
+
+  /* APPOINTMENTS LIST */
+  .appointments-section {
+    padding: 2rem 3rem;
+  }
+  .appt-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .appt-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: box-shadow 0.2s;
+  }
+  .appt-card:hover {
+    box-shadow: 0 4px 20px rgba(15,14,12,0.08);
+  }
+  .appt-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+  .appt-service-name {
+    font-weight: 600;
+    font-size: 1rem;
+    font-family: 'Playfair Display', serif;
+  }
+  .appt-status {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-weight: 500;
+    background: #e8f3ec;
+    color: var(--accent2);
+  }
+  .appt-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .appt-detail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--light-ink);
+  }
+  .appt-detail-icon { opacity: 0.5; font-size: 0.9rem; }
+  .appt-cancel {
+    margin-top: 1rem;
+    padding: 0.5rem;
+    width: 100%;
+    background: none;
+    border: 1px solid #f0d5cc;
+    border-radius: 6px;
+    color: var(--accent);
+    font-size: 0.78rem;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .appt-cancel:hover { background: #fff5f2; }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--light-ink);
+    opacity: 0.5;
+  }
+  .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .empty-text { font-size: 0.9rem; }
+
+  /* NAV TABS */
+  .page-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1.5px solid var(--border);
+    padding: 0 3rem;
+    background: var(--card-bg);
+  }
+  .page-tab {
+    padding: 1rem 1.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--light-ink);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1.5px;
+    transition: all 0.2s;
+  }
+  .page-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .page-tab:hover { color: var(--ink); }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  @media (max-width: 768px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1.5px solid var(--border); }
+    .booking-panel { left: 0; padding: 1rem 1.5rem; }
+    header { padding: 1rem 1.5rem; }
+    .main, .appointments-section { padding: 1.5rem; }
+    .page-tabs { padding: 0 1.5rem; }
+    .time-grid { grid-template-columns: repeat(3, 1fr); }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Bookr<span>.</span></div>
+  <nav class="header-nav">
+    <a onclick="showPage('book')">Book</a>
+    <a onclick="showPage('appointments')">My Appointments</a>
+  </nav>
+</header>
+
+<div class="page-tabs">
+  <div class="page-tab active" id="tab-book" onclick="showPage('book')">Book Appointment</div>
+  <div class="page-tab" id="tab-appointments" onclick="showPage('appointments')">Upcoming</div>
+</div>
+
+<!-- BOOK PAGE -->
+<div class="page active" id="page-book">
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Choose Service</div>
+        <div class="service-list" id="service-list"></div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">With</div>
+        <div class="staff-list" id="staff-list"></div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <div class="step-header">
+        <div class="step-title">Pick a date & time</div>
+        <div class="step-subtitle">All times shown in your local timezone</div>
+      </div>
+
+      <div class="calendar-wrapper">
+        <div class="calendar-nav">
+          <button class="cal-btn" onclick="changeMonth(-1)">&#8592;</button>
+          <div class="cal-month" id="cal-month"></div>
+          <button class="cal-btn" onclick="changeMonth(1)">&#8594;</button>
+        </div>
+        <div class="calendar-grid">
+          <div class="day-headers">
+            <div class="day-header">Su</div>
+            <div class="day-header">Mo</div>
+            <div class="day-header">Tu</div>
+            <div class="day-header">We</div>
+            <div class="day-header">Th</div>
+            <div class="day-header">Fr</div>
+            <div class="day-header">Sa</div>
+          </div>
+          <div class="days-grid" id="days-grid"></div>
+        </div>
+      </div>
+
+      <div class="slots-section" id="slots-section" style="display:none">
+        <div class="slots-title">
+          Available Times
+          <span class="date-badge" id="selected-date-badge"></span>
+        </div>
+        <div class="time-grid" id="time-grid"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- APPOINTMENTS PAGE -->
+<div class="page" id="page-appointments">
+  <div class="appointments-section">
+    <div class="step-title" style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:0.25rem">Your Appointments</div>
+    <div class="step-subtitle" style="font-size:0.9rem;color:var(--light-ink);opacity:0.8">Manage your upcoming bookings</div>
+    <div class="appt-list" id="appt-list"></div>
+  </div>
+</div>
+
+<!-- BOOKING PANEL -->
+<div class="booking-panel" id="booking-panel">
+  <div class="booking-summary" id="booking-summary"></div>
+  <button class="book-btn" onclick="openModal()">Continue →</button>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div id="modal-inner">
+      <div class="modal-header">
+        <div class="modal-title">Confirm Booking</div>
+        <div class="modal-sub">Just a few details to complete your appointment</div>
+      </div>
+      <div class="modal-body">
+        <div class="booking-recap" id="booking-recap"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input class="form-input" id="fname" type="text" placeholder="Jane">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input class="form-input" id="lname" type="text" placeholder="Doe">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" id="email" type="email" placeholder="jane@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone (optional)</label>
+          <input class="form-input" id="phone" type="tel" placeholder="+1 (555) 000-0000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes for your provider</label>
+          <input class="form-input" id="notes" type="text" placeholder="Any info they should know...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal()">Back</button>
+        <button class="btn-primary" onclick="confirmBooking()">Confirm Appointment</button>
+      </div>
+    </div>
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">✓</div>
+      <div class="success-title">You're booked!</div>
+      <div class="success-sub" id="success-message">Your appointment has been confirmed. Check your email for details.</div>
+      <button class="btn-primary" style="margin-top:1.5rem" onclick="closeModal(); showPage('appointments')">View Appointments →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const SERVICES = [
+  { id: 1, name: "Consultation", duration: "30 min", price: "Free", color: "#2a6b4a" },
+  { id: 2, name: "Full Session", duration: "60 min", price: "$95", color: "#c9572a" },
+  { id: 3, name: "Deep Dive", duration: "90 min", price: "$140", color: "#4a5ea0" },
+  { id: 4, name: "Follow-up", duration: "20 min", price: "$45", color: "#a07c2a" },
+];
+
+const STAFF = [
+  { id: 1, name: "Alex M.", initial: "A", bg: "#fde8dc", color: "#c9572a" },
+  { id: 2, name: "Sam K.", initial: "S", bg: "#dcedf5", color: "#2a5b7a" },
+  { id: 3, name: "Jordan", initial: "J", bg: "#e8f0de", color: "#3a6b2a" },
+  { id: 4, name: "Riley", initial: "R", bg: "#f0e8f5", color: "#6b2a8a" },
+];
+
+const SLOTS = ["9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM",
+               "1:00 PM","1:30 PM","2:00 PM","2:30 PM","3:00 PM","3:30 PM","4:00 PM","4:30 PM"];
+
+// Simulate some booked slots
+const BOOKED = { "1": ["10:00 AM","2:30 PM"], "2": ["9:30 AM","11:00 AM","3:00 PM"] };
+
+let state = {
+  selectedService: 1,
+  selectedStaff: 1,
+  selectedDate: null,
+  selectedTime: null,
+  currentYear: new Date().getFullYear(),
+  currentMonth: new Date().getMonth(),
+  appointments: [],
+};
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function renderServices() {
+  const el = document.getElementById('service-list');
+  el.innerHTML = SERVICES.map(s => `
+    <div class="service-item ${state.selectedService === s.id ? 'active' : ''}" onclick="selectService(${s.id})">
+      <div class="service-dot"></div>
+      <div class="service-info">
+        <div class="service-name">${s.name}</div>
+        <div class="service-duration">${s.duration}</div>
+      </div>
+      <div class="service-price" style="color:${s.color}">${s.price}</div>
+    </div>
+  `).join('');
+}
+
+function renderStaff() {
+  const el = document.getElementById('staff-list');
+  el.innerHTML = STAFF.map(s => `
+    <div class="staff-item ${state.selectedStaff === s.id ? 'active' : ''}" onclick="selectStaff(${s.id})">
+      <div class="staff-avatar" style="background:${s.bg};color:${s.color}">${s.initial}</div>
+      <div class="staff-name">${s.name}</div>
+    </div>
+  `).join('');
+}
+
+function renderCalendar() {
+  const months = ["January","February","March","April","May","June",
+                  "July","August","September","October","November","December"];
+  const { currentYear: y, currentMonth: m } = state;
+  document.getElementById('cal-month').textContent = `${months[m]} ${y}`;
+
+  const firstDay = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const today = new Date();
+
+  let html = '';
+  for (let i = 0; i < firstDay; i++) html += '<div class="day-cell empty"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(y, m, d);
+    const isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const isToday = date.toDateString() === today.toDateString();
+    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isSelected = state.selectedDate === dateStr;
+    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    const hasSlots = !isPast && !isWeekend;
+
+    let cls = 'day-cell';
+    if (isPast || isWeekend) cls += ' past';
+    else cls += ' available';
+    if (hasSlots) cls += ' has-slots';
+    if (isToday) cls += ' today';
+    if (isSelected) cls += ' selected';
+
+    const clickFn = (!isPast && !isWeekend) ? `onclick="selectDate('${dateStr}')"` : '';
+    html += `<div class="${cls}" ${clickFn}>${d}</div>`;
+  }
+  document.getElementById('days-grid').innerHTML = html;
+}
+
+function renderTimeSlots() {
+  const section = document.getElementById('slots-section');
+  if (!state.selectedDate) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+
+  const [y, m, d] = state.selectedDate.split('-');
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  document.getElementById('selected-date-badge').textContent =
+    `${months[parseInt(m)-1]} ${parseInt(d)}, ${y}`;
+
+  const booked = BOOKED[state.selectedStaff] || [];
+  const grid = document.getElementById('time-grid');
+  grid.innerHTML = SLOTS.map(t => {
+    const isBooked = booked.includes(t);
+    const isSelected = state.selectedTime === t;
+    let cls = 'time-slot';
+    if (isBooked) cls += ' booked';
+    else if (isSelected) cls += ' selected';
+    const click = !isBooked ? `onclick="selectTime('${t}')"` : '';
+    return `<div class="${cls}" ${click}>${t}</div>`;
+  }).join('');
+}
+
+function renderBookingPanel() {
+  const panel = document.getElementById('booking-panel');
+  if (!state.selectedDate || !state.selectedTime) {
+    panel.classList.remove('visible');
+    return;
+  }
+  panel.classList.add('visible');
+  const service = SERVICES.find(s => s.id === state.selectedService);
+  const staff = STAFF.find(s => s.id === state.selectedStaff);
+  const [y, m, d] = state.selectedDate.split('-');
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const dateStr = `${months[parseInt(m)-1]} ${parseInt(d)}`;
+
+  document.getElementById('booking-summary').innerHTML = `
+    <div class="summary-item">
+      <div class="summary-label">Service</div>
+      <div class="summary-value">${service.name}</div>
+    </div>
+    <div class="divider-dot"></div>
+    <div class="summary-item">
+      <div class="summary-label">With</div>
+      <div class="summary-value">${staff.name}</div>
+    </div>
+    <div class="divider-dot"></div>
+    <div class="summary-item">
+      <div class="summary-label">Date</div>
+      <div class="summary-value">${dateStr}</div>
+    </div>
+    <div class="divider-dot"></div>
+    <div class="summary-item">
+      <div class="summary-label">Time</div>
+      <div class="summary-value">${state.selectedTime}</div>
+    </div>
+    <div class="divider-dot"></div>
+    <div class="summary-item">
+      <div class="summary-label">Price</div>
+      <div class="summary-value">${service.price}</div>
+    </div>
+  `;
+}
+
+function renderAppointments() {
+  const list = document.getElementById('appt-list');
+  if (state.appointments.length === 0) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📅</div>
+      <div class="empty-text">No upcoming appointments.<br>Book one to get started!</div>
+    </div>`;
+    return;
+  }
+  list.innerHTML = state.appointments.map((a, i) => `
+    <div class="appt-card">
+      <div class="appt-card-header">
+        <div class="appt-service-name">${a.service}</div>
+        <div class="appt-status">Confirmed</div>
+      </div>
+      <div class="appt-details">
+        <div class="appt-detail"><span class="appt-detail-icon">👤</span>${a.staff}</div>
+        <div class="appt-detail"><span class="appt-detail-icon">📅</span>${a.date}</div>
+        <div class="appt-detail"><span class="appt-detail-icon">🕐</span>${a.time} · ${a.duration}</div>
+        <div class="appt-detail"><span class="appt-detail-icon">💳</span>${a.price}</div>
+      </div>
+      <button class="appt-cancel" onclick="cancelAppointment(${i})">Cancel Appointment</button>
+    </div>
+  `).join('');
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────────────────────────
+function selectService(id) {
+  state.selectedService = id;
+  state.selectedTime = null;
+  renderServices();
+  renderTimeSlots();
+  renderBookingPanel();
+}
+
+function selectStaff(id) {
+  state.selectedStaff = id;
+  state.selectedTime = null;
+  renderStaff();
+  renderTimeSlots();
+  renderBookingPanel();
+}
+
+function selectDate(dateStr) {
+  state.selectedDate = dateStr;
+  state.selectedTime = null;
+  renderCalendar();
+  renderTimeSlots();
+  renderBookingPanel();
+}
+
+function selectTime(time) {
+  state.selectedTime = time;
+  renderTimeSlots();
+  renderBookingPanel();
+}
+
+function changeMonth(dir) {
+  state.currentMonth += dir;
+  if (state.currentMonth < 0) { state.currentMonth = 11; state.currentYear--; }
+  if (state.currentMonth > 11) { state.currentMonth = 0; state.currentYear++; }
+  state.selectedDate = null;
+  state.selectedTime = null;
+  renderCalendar();
+  renderTimeSlots();
+  renderBookingPanel();
+}
+
+function openModal() {
+  const service = SERVICES.find(s => s.id === state.selectedService);
+  const staff = STAFF.find(s => s.id === state.selectedStaff);
+  const [y, m, d] = state.selectedDate.split('-');
+  const months = ["January","February","March","April","May","June",
+                  "July","August","September","October","November","December"];
+  const shortMonths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const dateStr = `${shortMonths[parseInt(m)-1]} ${parseInt(d)}, ${y}`;
+
+  document.getElementById('booking-recap').innerHTML = `
+    <div class="recap-item">
+      <div class="recap-label">Service</div>
+      <div class="recap-value">${service.name}</div>
+    </div>
+    <div class="recap-item">
+      <div class="recap-label">Provider</div>
+      <div class="recap-value">${staff.name}</div>
+    </div>
+    <div class="recap-item">
+      <div class="recap-label">Date</div>
+      <div class="recap-value">${dateStr}</div>
+    </div>
+    <div class="recap-item">
+      <div class="recap-label">Time</div>
+      <div class="recap-value">${state.selectedTime}</div>
+    </div>
+  `;
+
+  document.getElementById('modal-inner').style.display = '';
+  document.getElementById('success-screen').classList.remove('show');
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function confirmBooking() {
+  const fname = document.getElementById('fname').value.trim();
+  const email = document.getElementById('email').value.trim();
+  if (!fname || !email) {
+    alert('Please fill in your name and email.');
+    return;
+  }
+
+  const service = SERVICES.find(s => s.id === state.selectedService);
+  const staff = STAFF.find(s => s.id === state.selectedStaff);
+  const [y, m, d] = state.selectedDate.split('-');
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const dateStr = `${months[parseInt(m)-1]} ${parseInt(d)}, ${y}`;
+
+  state.appointments.push({
+    service: service.name,
+    staff: staff.name,
+    date: dateStr,
+    time: state.selectedTime,
+    duration: service.duration,
+    price: service.price,
+    customer: `${fname} ${document.getElementById('lname').value}`.trim(),
+    email,
+  });
+
+  document.getElementById('success-message').textContent =
+    `${fname}, your ${service.name} with ${staff.name} on ${dateStr} at ${state.selectedTime} is confirmed!`;
+
+  document.getElementById('modal-inner').style.display = 'none';
+  document.getElementById('success-screen').classList.add('show');
+
+  // Reset
+  state.selectedDate = null;
+  state.selectedTime = null;
+  renderCalendar();
+  renderTimeSlots();
+  renderBookingPanel();
+  renderAppointments();
+
+  // Clear form
+  ['fname','lname','email','phone','notes'].forEach(id => document.getElementById(id).value = '');
+}
+
+function cancelAppointment(index) {
+  if (confirm('Cancel this appointment?')) {
+    state.appointments.splice(index, 1);
+    renderAppointments();
+  }
+}
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`page-${page}`).classList.add('active');
+  document.getElementById(`tab-${page}`).classList.add('active');
+  if (page === 'appointments') renderAppointments();
+}
+
+// Close modal on overlay click
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+renderServices();
+renderStaff();
+renderCalendar();
+</script>
+</body>
+</html>
